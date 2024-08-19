@@ -8,11 +8,12 @@ Auto solucionador:                  Morales
 Hint:                               Daniel
 
 
-Musica, algo mas de vida
-Tests
-
 ## Terminar pal domingo
 
 Mouse
 Deshacer
 Auto solver
+
+## Extra
+Musica, algo mas de vida
+Tests
