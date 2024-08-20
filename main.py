@@ -18,6 +18,13 @@ towers_midx = [120, 320, 520]
 pointing_at = 0
 floating = False
 floater = 0
+first_move = False
+
+# button vars:
+button_color = (200, 200, 200)
+button_hover_color = (170, 170, 170)
+button_rect = pygame.Rect(270, 410, 100, 40)
+button_text = "Start"
 
 # colors:
 white = (255, 255, 255)
@@ -137,19 +144,28 @@ def check_won():
 
 
 def reset():
-    global steps, pointing_at, floating, floater
+    global steps, pointing_at, floating, floater, first_move
     steps = 0
     pointing_at = 0
     floating = False
     floater = 0
+    first_move = False
     menu_screen()
     make_disks()
+
+
+def draw_button():
+    pygame.draw.rect(screen, button_color, button_rect)
+    blit_text(screen, button_text, button_rect.center, font_name='sans serif', size=30, color=black)
 
 
 menu_screen()
 make_disks()
 # main game loop:
 while not game_done:
+    mouse_pos = pygame.mouse.get_pos()
+    button_color = button_hover_color if button_rect.collidepoint(mouse_pos) else (200, 200, 200)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_done = True
@@ -182,17 +198,64 @@ while not game_done:
                             floating = False
                             disks[floater]['rect'].midtop = (towers_midx[pointing_at], disk['rect'].top-23)
                             steps += 1
+                            first_move = True
                         break
                 else:
                     floating = False
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
-                    steps += 1
+                    steps += 1 
+                    first_move = True
+        
+        ## Solver
+        if event.type == pygame.MOUSEBUTTONDOWN and not first_move:
+            if button_rect.collidepoint(mouse_pos):
+                print("test")
+
+                #pick up
+                pointing_at=0
+                for disk in disks[::-1]:
+                    if disk['tower'] == pointing_at:
+                        floating = True
+                        floater = disks.index(disk)
+                        disk['rect'].midtop = (towers_midx[pointing_at], 100)
+                        break
+                
+                #move
+                pointing_at=2
+                if floating:
+                    disks[floater]['rect'].midtop = (towers_midx[pointing_at], 100)
+                    disks[floater]['tower'] = pointing_at
+
+                #drop
+                if floating:
+                    for disk in disks[::-1]:
+                        if disk['tower'] == pointing_at and disks.index(disk) != floater:
+                            if disk['val'] > disks[floater]['val']:
+                                floating = False
+                                disks[floater]['rect'].midtop = (towers_midx[pointing_at], disk['rect'].top-23)
+                                steps += 1
+                                first_move = True
+                            break
+                    else:
+                        floating = False
+                        disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
+                        steps += 1 
+                        first_move = True
+                
+                
+           
+        
+
+                first_move = True  # Button disappears after the first click
+
     screen.fill(white)
-    draw_towers()
+    draw_towers() 
     draw_disks()
     draw_ptr()
+    if not first_move:
+        draw_button()
     blit_text(screen, 'Steps: '+str(steps), (320, 20), font_name='mono', size=30, color=black)
     pygame.display.flip()
-    if not floating:
+    if not floating and first_move:
         check_won()
     clock.tick(framerate)
