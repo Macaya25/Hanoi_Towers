@@ -1,7 +1,8 @@
 import pygame
 import sys
 import time
-
+from solver import *
+ 
 pygame.init()
 pygame.display.set_caption("Towers of Hanoi")
 screen = pygame.display.set_mode((640, 480))
@@ -211,36 +212,7 @@ while not game_done:
             if button_rect.collidepoint(mouse_pos):
                 print("test")
 
-                #pick up
-                pointing_at=0
-                for disk in disks[::-1]:
-                    if disk['tower'] == pointing_at:
-                        floating = True
-                        floater = disks.index(disk)
-                        disk['rect'].midtop = (towers_midx[pointing_at], 100)
-                        break
-                
-                #move
-                pointing_at=2
-                if floating:
-                    disks[floater]['rect'].midtop = (towers_midx[pointing_at], 100)
-                    disks[floater]['tower'] = pointing_at
-
-                #drop
-                if floating:
-                    for disk in disks[::-1]:
-                        if disk['tower'] == pointing_at and disks.index(disk) != floater:
-                            if disk['val'] > disks[floater]['val']:
-                                floating = False
-                                disks[floater]['rect'].midtop = (towers_midx[pointing_at], disk['rect'].top-23)
-                                steps += 1
-                                first_move = True
-                            break
-                    else:
-                        floating = False
-                        disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
-                        steps += 1 
-                        first_move = True
+                auto_move(0, 2, towers_midx, disks, steps)
                 
                 
            
