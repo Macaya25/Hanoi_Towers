@@ -1,10 +1,12 @@
-def hanoi_solver(n, source, target, auxiliary):
+def hanoi_solver(n, source, target, auxiliary, output_list):
     if n == 1:
         print(f"{source} to {target}")
+        output_list.append({"start":source ,"finish":target})
         return
-    hanoi_solver(n - 1, source, auxiliary, target)
+    hanoi_solver(n - 1, source, auxiliary, target, output_list)
     print(f"{source} to {target}")
-    hanoi_solver(n - 1, auxiliary, target, source)
+    output_list.append({"start":source ,"finish":target})
+    hanoi_solver(n - 1, auxiliary, target, source, output_list)
 
 def auto_move(start, end, towers_midx, disks, steps):
     

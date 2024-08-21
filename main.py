@@ -25,7 +25,7 @@ first_move = False
 button_color = (200, 200, 200)
 button_hover_color = (170, 170, 170)
 button_rect = pygame.Rect(270, 410, 100, 40)
-button_text = "Start"
+button_text = "Autosolve"
 
 # colors:
 white = (255, 255, 255)
@@ -210,14 +210,15 @@ while not game_done:
         ## Solver
         if event.type == pygame.MOUSEBUTTONDOWN and not first_move:
             if button_rect.collidepoint(mouse_pos):
-                print("test")
-
-                auto_move(0, 2, towers_midx, disks, steps)
+                move_set=[]
+                hanoi_solver(n_disks, 0, 2, 1, move_set)
+                print("output :",move_set)
+                for move in move_set:
+                    print(move)
+                    auto_move(move["start"], move["finish"], towers_midx, disks, steps)
+                    
                 
-                
-           
         
-
                 first_move = True  # Button disappears after the first click
 
     screen.fill(white)
