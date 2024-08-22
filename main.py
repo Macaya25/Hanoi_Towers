@@ -101,6 +101,7 @@ def draw_towers():
         pygame.draw.rect(screen, grey, pygame.Rect(xpos+75, 200, 10, 200))
     blit_text(screen, 'Start', (towers_midx[0], 403), font_name='mono', size=14, color=black)
     blit_text(screen, 'Finish', (towers_midx[2], 403), font_name='mono', size=14, color=black)
+    blit_text(screen, 'For hint press h', (towers_midx[1], 403), font_name='mono', size=14, color=black)
 
 
 def make_disks():
@@ -159,6 +160,45 @@ def draw_button():
     pygame.draw.rect(screen, button_color, button_rect)
     blit_text(screen, button_text, button_rect.center, font_name='sans serif', size=30, color=black)
 
+# Function to get the current state of the towers from the disk dictionaries
+def get_tower_state(disks, n_disks):
+    # The state will be a list of three lists, representing the three towers
+    towers = [[], [], []]
+    for i in range(n_disks):
+        disk = disks[i]
+        if isinstance(disk, dict) and 'tower' in disk:
+            tower_index = disk['tower']  # Access the tower index from the 'tower' key
+            if tower_index in range(3):  # Ensure the tower index is valid (0, 1, or 2)
+                towers[tower_index].append(disk['val'])  # Use 'val' to represent the disk size
+            else:
+                print(f"Invalid tower index: {tower_index}")
+        else:
+            print(f"Invalid disk data structure: {disk}")
+    return towers
+
+
+
+
+# Function to find the next optimal move using the recursive Hanoi solution logic
+def hanoi_move(n, source, target, auxiliary, moves):
+    if n == 1:
+        moves.append((source, target))
+        return
+    hanoi_move(n - 1, source, auxiliary, target, moves)
+    moves.append((source, target))
+    hanoi_move(n - 1, auxiliary, target, source, moves)
+
+def get_next_move(towers):
+    n = sum(len(tower) for tower in towers)
+    moves = []
+    hanoi_move(n, 0, 2, 1, moves)  # Solve for n disks, moving from Tower 0 to Tower 2 using Tower 1 as auxiliary
+    
+    # Find the first move that hasn't been made yet
+    for move in moves:
+        source_tower, target_tower = move
+        if towers[source_tower] and (not towers[target_tower] or towers[source_tower][-1] < towers[target_tower][-1]):
+            return move
+    return None
 
 menu_screen()
 make_disks()
@@ -206,13 +246,21 @@ while not game_done:
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
                     steps += 1 
                     first_move = True
+            if event.key == pygame.K_h:
+                towers = get_tower_state(disks, n_disks)
+                hint = get_next_move(towers)
+                if hint:
+                    print(f"Hint: Move disk from Tower {hint[0] + 1} to Tower {hint[1] + 1}")
+                    # Optionally display this on the game screen
+                    blit_text(screen, f"Hint: Move from Tower {hint[0] + 1} to Tower {hint[1] + 1}", (320, 380), font_name='sans serif', size=20, color=red)
+                    pygame.display.update()
         
         ## Solver
         if event.type == pygame.MOUSEBUTTONDOWN and not first_move:
             if button_rect.collidepoint(mouse_pos):
                 print("test")
 
-                auto_move(0, 2, towers_midx, disks, steps)
+                # auto_move(0, 2, towers_midx, disks, steps)
                 
                 
            
