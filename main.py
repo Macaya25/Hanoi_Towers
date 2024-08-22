@@ -252,8 +252,9 @@ while not game_done:
                 if hint:
                     print(f"Hint: Move disk from Tower {hint[0] + 1} to Tower {hint[1] + 1}")
                     # Optionally display this on the game screen
-                    blit_text(screen, f"Hint: Move from Tower {hint[0] + 1} to Tower {hint[1] + 1}", (320, 380), font_name='sans serif', size=20, color=red)
+                    blit_text(screen, f"Hint: Move from Tower {hint[0] + 1} to Tower {hint[1] + 1}", (320, 80), font_name='sans serif', size=30, color=red)
                     pygame.display.update()
+                    pygame.time.wait(2000)
         
         ## Solver
         if event.type == pygame.MOUSEBUTTONDOWN and not first_move:
