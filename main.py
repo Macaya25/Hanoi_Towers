@@ -1,6 +1,7 @@
 import pygame
 import sys
 import time
+from UI import Palette
 
 pygame.init()
 pygame.display.set_caption("Towers of Hanoi")
@@ -28,6 +29,8 @@ blue = (78, 162, 196)
 grey = (170, 170, 170)
 green = (77, 206, 145)
 
+colors = Palette(1)
+
 
 def blit_text(screen, text, midtop, aa=True, font=None, font_name=None, size=None, color=(255, 0, 0)):
     if font is None:                                    # font option is provided to save memory if font is
@@ -38,16 +41,19 @@ def blit_text(screen, text, midtop, aa=True, font=None, font_name=None, size=Non
     screen.blit(font_surface, font_rect)
 
 
-def menu_screen():  # to be called before starting actual game loop
+def menu_screen(colors: Palette):  # to be called before starting actual game loop
     global screen, n_disks, game_done
     menu_done = False
     while not menu_done:  # every screen/scene/level has its own loop
-        screen.fill(white)
-        blit_text(screen, 'Towers of Hanoi', (323, 122), font_name='sans serif', size=90, color=grey)
-        blit_text(screen, 'Towers of Hanoi', (320, 120), font_name='sans serif', size=90, color=gold)
-        blit_text(screen, 'Use arrow keys to select difficulty:', (320, 220), font_name='sans serif', size=30, color=black)
-        blit_text(screen, str(n_disks), (320, 260), font_name='sans serif', size=40, color=blue)
-        blit_text(screen, 'Press ENTER to continue', (320, 320), font_name='sans_serif', size=30, color=black)
+        screen.fill(colors.background_color)
+        blit_text(screen, 'Towers of Hanoi', (323, 122), font_name='sans serif', size=90, color=colors.title_1)
+        blit_text(screen, 'Towers of Hanoi', (320, 120), font_name='sans serif', size=90, color=colors.title_2)
+        blit_text(screen, 'Use arrow keys to select difficulty:', (320, 220),
+                  font_name='sans serif', size=30, color=(54, 69, 79))
+        blit_text(screen, str(n_disks), (320, 260), font_name='sans serif', size=40, color=(255, 69, 0))
+        blit_text(screen, 'Press ENTER to continue', (320, 320), font_name='sans_serif',
+                  size=30, color=(54, 69, 79))
+
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
@@ -86,11 +92,11 @@ def game_over():  # game over screen
     sys.exit()  # console exit
 
 
-def draw_towers():
+def draw_towers(colors: Palette):
     global screen
     for xpos in range(40, 460+1, 200):
-        pygame.draw.rect(screen, green, pygame.Rect(xpos, 400, 160, 20))
-        pygame.draw.rect(screen, grey, pygame.Rect(xpos+75, 200, 10, 200))
+        pygame.draw.rect(screen, colors.color_1, pygame.Rect(xpos, 400, 160, 20))
+        pygame.draw.rect(screen, colors.color_2, pygame.Rect(xpos+75, 200, 10, 200))
     blit_text(screen, 'Start', (towers_midx[0], 403), font_name='mono', size=14, color=black)
     blit_text(screen, 'Finish', (towers_midx[2], 403), font_name='mono', size=14, color=black)
 
@@ -142,11 +148,11 @@ def reset():
     pointing_at = 0
     floating = False
     floater = 0
-    menu_screen()
+    menu_screen(colors)
     make_disks()
 
 
-menu_screen()
+menu_screen(colors)
 make_disks()
 # main game loop:
 while not game_done:
@@ -187,8 +193,8 @@ while not game_done:
                     floating = False
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
                     steps += 1
-    screen.fill(white)
-    draw_towers()
+    screen.fill(colors.background_color)
+    draw_towers(colors)
     draw_disks()
     draw_ptr()
     blit_text(screen, 'Steps: '+str(steps), (320, 20), font_name='mono', size=30, color=black)
