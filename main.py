@@ -1,7 +1,7 @@
 import pygame
 import sys
 import time
-from UI import Palette
+from UI import Palette, blit_text, draw_towers, draw_disks, draw_ptr
 
 pygame.init()
 pygame.display.set_caption("Towers of Hanoi")
@@ -25,20 +25,10 @@ white = (255, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
 gold = (239, 229, 51)
-blue = (78, 162, 196)
 grey = (170, 170, 170)
 green = (77, 206, 145)
 
 colors = Palette(1)
-
-
-def blit_text(screen, text, midtop, aa=True, font=None, font_name=None, size=None, color=(255, 0, 0)):
-    if font is None:                                    # font option is provided to save memory if font is
-        font = pygame.font.SysFont(font_name, size)     # already loaded and needs to be reused many times
-    font_surface = font.render(text, aa, color)
-    font_rect = font_surface.get_rect()
-    font_rect.midtop = midtop
-    screen.blit(font_surface, font_rect)
 
 
 def menu_screen(colors: Palette):  # to be called before starting actual game loop
@@ -92,15 +82,6 @@ def game_over():  # game over screen
     sys.exit()  # console exit
 
 
-def draw_towers(colors: Palette):
-    global screen
-    for xpos in range(40, 460+1, 200):
-        pygame.draw.rect(screen, colors.color_1, pygame.Rect(xpos, 400, 160, 20))
-        pygame.draw.rect(screen, colors.color_2, pygame.Rect(xpos+75, 200, 10, 200))
-    blit_text(screen, 'Start', (towers_midx[0], 403), font_name='mono', size=14, color=black)
-    blit_text(screen, 'Finish', (towers_midx[2], 403), font_name='mono', size=14, color=black)
-
-
 def make_disks():
     global n_disks, disks
     disks = []
@@ -116,19 +97,6 @@ def make_disks():
         disks.append(disk)
         ypos -= height+3
         width -= 23
-
-
-def draw_disks():
-    global screen, disks
-    for disk in disks:
-        pygame.draw.rect(screen, blue, disk['rect'])
-    return
-
-
-def draw_ptr():
-    ptr_points = [(towers_midx[pointing_at]-7, 440), (towers_midx[pointing_at]+7, 440), (towers_midx[pointing_at], 433)]
-    pygame.draw.polygon(screen, red, ptr_points)
-    return
 
 
 def check_won():
@@ -194,9 +162,9 @@ while not game_done:
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
                     steps += 1
     screen.fill(colors.background_color)
-    draw_towers(colors)
-    draw_disks()
-    draw_ptr()
+    draw_towers(screen, towers_midx, colors)
+    draw_disks(screen, disks, colors)
+    draw_ptr(screen, towers_midx, pointing_at, colors)
     blit_text(screen, 'Steps: '+str(steps), (320, 20), font_name='mono', size=30, color=black)
     pygame.display.flip()
     if not floating:
