@@ -28,11 +28,13 @@ gold = (239, 229, 51)
 grey = (170, 170, 170)
 green = (77, 206, 145)
 
-colors = Palette(2)
+current_theme = 1
+max_themes = 2
+colors = Palette(current_theme)
 
 
-def menu_screen(colors: Palette):  # to be called before starting actual game loop
-    global screen, n_disks, game_done
+def menu_screen():  # to be called before starting actual game loop
+    global screen, n_disks, game_done, colors, current_theme
     menu_done = False
     while not menu_done:  # every screen/scene/level has its own loop
         draw_menu(screen, n_disks, colors)
@@ -44,14 +46,27 @@ def menu_screen(colors: Palette):  # to be called before starting actual game lo
                     game_done = True
                 elif event.key == pygame.K_RETURN:
                     menu_done = True
-                elif event.key in [pygame.K_RIGHT, pygame.K_UP]:
+                elif event.key == pygame.K_UP:
                     n_disks += 1
                     if n_disks > 6:
                         n_disks = 6
-                elif event.key in [pygame.K_LEFT, pygame.K_DOWN]:
+                elif event.key == pygame.K_DOWN:
                     n_disks -= 1
                     if n_disks < 1:
                         n_disks = 1
+                elif event.key == pygame.K_LEFT:
+                    current_theme -= 1
+                    if current_theme < 1:
+                        current_theme = max_themes
+                    colors = Palette(current_theme)
+                    draw_menu(screen, n_disks, colors)
+                elif event.key == pygame.K_RIGHT:
+                    current_theme += 1
+                    if current_theme > max_themes:
+                        current_theme = 1
+                    colors = Palette(current_theme)
+                    draw_menu(screen, n_disks, colors)
+
             elif event.type == pygame.QUIT:
                 menu_done = True
                 game_done = True
@@ -63,8 +78,9 @@ def game_over(screen, steps, colors):  # game over screen
     draw_game_over(screen, steps, n_disks, colors)
     while True:
         for event in pygame.event.get():
-            if event.key == pygame.K_q:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 sys.exit()  # console exit
+        clock.tick(60)
 
 
 def make_disks():
@@ -101,11 +117,11 @@ def reset():
     pointing_at = 0
     floating = False
     floater = 0
-    menu_screen(colors)
+    menu_screen()
     make_disks()
 
 
-menu_screen(colors)
+menu_screen()
 make_disks()
 # main game loop:
 while not game_done:
@@ -151,7 +167,7 @@ while not game_done:
     draw_towers(screen, towers_midx, colors)
     draw_disks(screen, disks, colors)
     draw_ptr(screen, towers_midx, pointing_at, colors)
-    blit_text(screen, 'Steps: '+str(steps), (320, 20), font_name='mono', size=30, color=black)
+    blit_text(screen, 'Steps: '+str(steps), (320, 20), font_name='mono', size=30, color=colors.text_black)
     pygame.display.flip()
 
     if not floating:

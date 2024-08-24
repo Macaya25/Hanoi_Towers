@@ -42,7 +42,7 @@ def draw_menu(screen, n_disks, colors: Palette):
     screen.fill(colors.background_color)
     blit_text(screen, 'Towers of Hanoi', (323, 122), font_name='sans serif', size=90, color=colors.title_1)
     blit_text(screen, 'Towers of Hanoi', (320, 120), font_name='sans serif', size=90, color=colors.title_2)
-    blit_text(screen, 'Use arrow keys to select difficulty:', (320, 220),
+    blit_text(screen, "Use up or down arrows to select difficulty:", (320, 220),
               font_name='sans serif', size=30, color=colors.text_black)
     blit_text(screen, str(n_disks), (320, 260), font_name='sans serif', size=40, color=colors.text_1)
     blit_text(screen, 'Press ENTER to continue', (320, 320), font_name='sans_serif',
