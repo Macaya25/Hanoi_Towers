@@ -16,6 +16,18 @@ class Palette():
 
                 self.disk = (78, 162, 196)
 
+            case 2:
+                self.background_color = (25, 25, 112)
+                self.title_1 = (255, 165, 0)
+                self.title_2 = (255, 165, 10)
+                self.text_black = (255, 255, 255)
+                self.text_1 = (255, 20, 147)
+
+                self.tower_1 = (77, 77, 255)
+                self.tower_2 = (77, 77, 255)
+
+                self.disk = (57, 255, 20)
+
 
 def blit_text(screen, text, midtop, aa=True, font=None, font_name=None, size=None, color=(255, 0, 0)):
     if font is None:                                    # font option is provided to save memory if font is
@@ -24,6 +36,17 @@ def blit_text(screen, text, midtop, aa=True, font=None, font_name=None, size=Non
     font_rect = font_surface.get_rect()
     font_rect.midtop = midtop
     screen.blit(font_surface, font_rect)
+
+
+def draw_menu(screen, n_disks, colors: Palette):
+    screen.fill(colors.background_color)
+    blit_text(screen, 'Towers of Hanoi', (323, 122), font_name='sans serif', size=90, color=colors.title_1)
+    blit_text(screen, 'Towers of Hanoi', (320, 120), font_name='sans serif', size=90, color=colors.title_2)
+    blit_text(screen, 'Use arrow keys to select difficulty:', (320, 220),
+              font_name='sans serif', size=30, color=colors.text_black)
+    blit_text(screen, str(n_disks), (320, 260), font_name='sans serif', size=40, color=colors.text_1)
+    blit_text(screen, 'Press ENTER to continue', (320, 320), font_name='sans_serif',
+              size=30, color=colors.text_black)
 
 
 def draw_towers(screen, towers_midx, colors: Palette):
@@ -37,10 +60,20 @@ def draw_towers(screen, towers_midx, colors: Palette):
 def draw_disks(screen, disks, colors: Palette):
     for disk in disks:
         pygame.draw.rect(screen, colors.disk, disk['rect'])
-    return
 
 
 def draw_ptr(screen, towers_midx, pointing_at, colors: Palette):
     ptr_points = [(towers_midx[pointing_at]-7, 440), (towers_midx[pointing_at]+7, 440), (towers_midx[pointing_at], 433)]
     pygame.draw.polygon(screen, colors.disk, ptr_points)
-    return
+
+
+def draw_game_over(screen, steps, n_disks, colors: Palette):
+    screen.fill(colors.background_color)
+    min_steps = 2**n_disks - 1
+    blit_text(screen, 'You Won!', (320, 200), font_name='sans serif', size=72, color=colors.title_1)
+    blit_text(screen, 'You Won!', (322, 202), font_name='sans serif', size=72, color=colors.title_2)
+    blit_text(screen, 'Your Steps: '+str(steps), (320, 360), font_name='mono', size=30, color=colors.text_black)
+    blit_text(screen, 'Minimum Steps: '+str(min_steps), (320, 390), font_name='mono', size=30, color=colors.disk)
+    if min_steps == steps:
+        blit_text(screen, 'You finished in minumum steps!', (320, 300), font_name='mono', size=26, color=colors.disk)
+    pygame.display.flip()

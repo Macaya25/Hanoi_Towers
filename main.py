@@ -1,7 +1,7 @@
 import pygame
 import sys
 import time
-from UI import Palette, blit_text, draw_towers, draw_disks, draw_ptr
+from UI import Palette, blit_text, draw_menu, draw_towers, draw_disks, draw_ptr, draw_game_over
 
 pygame.init()
 pygame.display.set_caption("Towers of Hanoi")
@@ -28,58 +28,43 @@ gold = (239, 229, 51)
 grey = (170, 170, 170)
 green = (77, 206, 145)
 
-colors = Palette(1)
+colors = Palette(2)
 
 
 def menu_screen(colors: Palette):  # to be called before starting actual game loop
     global screen, n_disks, game_done
     menu_done = False
     while not menu_done:  # every screen/scene/level has its own loop
-        screen.fill(colors.background_color)
-        blit_text(screen, 'Towers of Hanoi', (323, 122), font_name='sans serif', size=90, color=colors.title_1)
-        blit_text(screen, 'Towers of Hanoi', (320, 120), font_name='sans serif', size=90, color=colors.title_2)
-        blit_text(screen, 'Use arrow keys to select difficulty:', (320, 220),
-                  font_name='sans serif', size=30, color=(54, 69, 79))
-        blit_text(screen, str(n_disks), (320, 260), font_name='sans serif', size=40, color=(255, 69, 0))
-        blit_text(screen, 'Press ENTER to continue', (320, 320), font_name='sans_serif',
-                  size=30, color=(54, 69, 79))
+        draw_menu(screen, n_disks, colors)
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     menu_done = True
                     game_done = True
-                if event.key == pygame.K_RETURN:
+                elif event.key == pygame.K_RETURN:
                     menu_done = True
-                if event.key in [pygame.K_RIGHT, pygame.K_UP]:
+                elif event.key in [pygame.K_RIGHT, pygame.K_UP]:
                     n_disks += 1
                     if n_disks > 6:
                         n_disks = 6
-                if event.key in [pygame.K_LEFT, pygame.K_DOWN]:
+                elif event.key in [pygame.K_LEFT, pygame.K_DOWN]:
                     n_disks -= 1
                     if n_disks < 1:
                         n_disks = 1
-            if event.type == pygame.QUIT:
+            elif event.type == pygame.QUIT:
                 menu_done = True
                 game_done = True
         pygame.display.flip()
         clock.tick(60)
 
 
-def game_over():  # game over screen
-    global screen, steps
-    screen.fill(white)
-    min_steps = 2**n_disks-1
-    blit_text(screen, 'You Won!', (320, 200), font_name='sans serif', size=72, color=gold)
-    blit_text(screen, 'You Won!', (322, 202), font_name='sans serif', size=72, color=gold)
-    blit_text(screen, 'Your Steps: '+str(steps), (320, 360), font_name='mono', size=30, color=black)
-    blit_text(screen, 'Minimum Steps: '+str(min_steps), (320, 390), font_name='mono', size=30, color=red)
-    if min_steps == steps:
-        blit_text(screen, 'You finished in minumum steps!', (320, 300), font_name='mono', size=26, color=green)
-    pygame.display.flip()
-    time.sleep(2)   # wait for 2 secs
-    pygame.quit()  # pygame exit
-    sys.exit()  # console exit
+def game_over(screen, steps, colors):  # game over screen
+    draw_game_over(screen, steps, n_disks, colors)
+    while True:
+        for event in pygame.event.get():
+            if event.key == pygame.K_q:
+                sys.exit()  # console exit
 
 
 def make_disks():
@@ -107,7 +92,7 @@ def check_won():
             over = False
     if over:
         time.sleep(0.2)
-        game_over()
+        game_over(screen, steps, colors)
 
 
 def reset():
@@ -161,12 +146,15 @@ while not game_done:
                     floating = False
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
                     steps += 1
+
     screen.fill(colors.background_color)
     draw_towers(screen, towers_midx, colors)
     draw_disks(screen, disks, colors)
     draw_ptr(screen, towers_midx, pointing_at, colors)
     blit_text(screen, 'Steps: '+str(steps), (320, 20), font_name='mono', size=30, color=black)
     pygame.display.flip()
+
     if not floating:
         check_won()
+
     clock.tick(framerate)
