@@ -1,8 +1,10 @@
 import pygame
 import sys
 import time
+import copy
+from UI import Palette, blit_text, draw_menu, draw_towers, draw_disks, draw_ptr, draw_game_over
 from solver import *
- 
+
 pygame.init()
 pygame.display.set_caption("Towers of Hanoi")
 screen = pygame.display.set_mode((640, 480))
@@ -19,13 +21,18 @@ towers_midx = [120, 320, 520]
 pointing_at = 0
 floating = False
 floater = 0
+previous_movements = []
 first_move = False
 
 # button vars:
 button_color = (200, 200, 200)
 button_hover_color = (170, 170, 170)
 button_rect = pygame.Rect(270, 410, 100, 40)
-button_text = "Start"
+button_text = "Autosolve"
+
+click_tower_1 = pygame.Rect(40, 200, 160, 220)
+click_tower_2 = pygame.Rect(240, 200, 160, 220)
+click_tower_3 = pygame.Rect(440, 200, 160, 220)
 
 # colors:
 white = (255, 255, 255)
@@ -36,42 +43,51 @@ blue = (78, 162, 196)
 grey = (170, 170, 170)
 green = (77, 206, 145)
 
+current_theme = 1
+max_themes = 2
+colors = Palette(current_theme)
 
-def blit_text(screen, text, midtop, aa=True, font=None, font_name=None, size=None, color=(255, 0, 0)):
-    if font is None:                                    # font option is provided to save memory if font is
-        font = pygame.font.SysFont(font_name, size)     # already loaded and needs to be reused many times
-    font_surface = font.render(text, aa, color)
-    font_rect = font_surface.get_rect()
-    font_rect.midtop = midtop
-    screen.blit(font_surface, font_rect)
+
+def draw_button():
+    pygame.draw.rect(screen, button_color, button_rect)
+    blit_text(screen, button_text, button_rect.center, font_name='sans serif', size=30, color=black)
 
 
 def menu_screen():  # to be called before starting actual game loop
-    global screen, n_disks, game_done
+    global screen, n_disks, game_done, colors, current_theme
     menu_done = False
     while not menu_done:  # every screen/scene/level has its own loop
-        screen.fill(white)
-        blit_text(screen, 'Towers of Hanoi', (323, 122), font_name='sans serif', size=90, color=grey)
-        blit_text(screen, 'Towers of Hanoi', (320, 120), font_name='sans serif', size=90, color=gold)
-        blit_text(screen, 'Use arrow keys to select difficulty:', (320, 220), font_name='sans serif', size=30, color=black)
-        blit_text(screen, str(n_disks), (320, 260), font_name='sans serif', size=40, color=blue)
-        blit_text(screen, 'Press ENTER to continue', (320, 320), font_name='sans_serif', size=30, color=black)
+        draw_menu(screen, n_disks, colors)
+
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     menu_done = True
                     game_done = True
-                if event.key == pygame.K_RETURN:
+                elif event.key == pygame.K_RETURN:
                     menu_done = True
-                if event.key in [pygame.K_RIGHT, pygame.K_UP]:
+                elif event.key == pygame.K_UP:
                     n_disks += 1
                     if n_disks > 6:
                         n_disks = 6
-                if event.key in [pygame.K_LEFT, pygame.K_DOWN]:
+                elif event.key == pygame.K_DOWN:
                     n_disks -= 1
                     if n_disks < 1:
                         n_disks = 1
-            if event.type == pygame.QUIT:
+                elif event.key == pygame.K_LEFT:
+                    current_theme -= 1
+                    if current_theme < 1:
+                        current_theme = max_themes
+                    colors = Palette(current_theme)
+                    draw_menu(screen, n_disks, colors)
+                elif event.key == pygame.K_RIGHT:
+                    current_theme += 1
+                    if current_theme > max_themes:
+                        current_theme = 1
+                    colors = Palette(current_theme)
+                    draw_menu(screen, n_disks, colors)
+
+            elif event.type == pygame.QUIT:
                 menu_done = True
                 game_done = True
         pygame.display.flip()
@@ -94,15 +110,6 @@ def game_over():  # game over screen
     sys.exit()  # console exit
 
 
-def draw_towers():
-    global screen
-    for xpos in range(40, 460+1, 200):
-        pygame.draw.rect(screen, green, pygame.Rect(xpos, 400, 160, 20))
-        pygame.draw.rect(screen, grey, pygame.Rect(xpos+75, 200, 10, 200))
-    blit_text(screen, 'Start', (towers_midx[0], 403), font_name='mono', size=14, color=black)
-    blit_text(screen, 'Finish', (towers_midx[2], 403), font_name='mono', size=14, color=black)
-    blit_text(screen, 'For hint press h', (towers_midx[1], 403), font_name='mono', size=14, color=black)
-
 
 def make_disks():
     global n_disks, disks
@@ -119,19 +126,6 @@ def make_disks():
         disks.append(disk)
         ypos -= height+3
         width -= 23
-
-
-def draw_disks():
-    global screen, disks
-    for disk in disks:
-        pygame.draw.rect(screen, blue, disk['rect'])
-    return
-
-
-def draw_ptr():
-    ptr_points = [(towers_midx[pointing_at]-7, 440), (towers_midx[pointing_at]+7, 440), (towers_midx[pointing_at], 433)]
-    pygame.draw.polygon(screen, red, ptr_points)
-    return
 
 
 def check_won():
@@ -156,9 +150,6 @@ def reset():
     make_disks()
 
 
-def draw_button():
-    pygame.draw.rect(screen, button_color, button_rect)
-    blit_text(screen, button_text, button_rect.center, font_name='sans serif', size=30, color=black)
 
 # Function to get the current state of the towers from the disk dictionaries
 def get_tower_state(disks, n_disks):
@@ -200,17 +191,103 @@ def get_next_move(towers):
             return move
     return None
 
+
+
 menu_screen()
 make_disks()
 # main game loop:
 while not game_done:
     mouse_pos = pygame.mouse.get_pos()
-    button_color = button_hover_color if button_rect.collidepoint(mouse_pos) else (200, 200, 200)
-
+    blit_text(screen, button_text, button_rect.center, font_name='sans serif', size=30, color=black)
     for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = event.pos
+            if (floating):
+                if (click_tower_1.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 0 and disks.index(disk) != floater:
+                            if disk['val'] > disks[floater]['val']:
+                                floating = False
+                                disks[floater]['rect'].midtop = (towers_midx[0], disk['rect'].top-23)
+                                disks[floater]['tower'] = 0
+                                print("origin", disks)
+                                steps += 1
+                            break
+                    else:
+                        floating = False
+                        disks[floater]['rect'].midtop = (towers_midx[0], 400-23)
+                        disks[floater]['tower'] = 0
+                        steps += 1
+                if (click_tower_2.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 1 and disks.index(disk) != floater:
+                            if disk['val'] > disks[floater]['val']:
+                                floating = False
+                                disks[floater]['rect'].midtop = (towers_midx[1], disk['rect'].top-23)
+                                disks[floater]['tower'] = 1
+                                print("origin", disks)
+                                steps += 1
+                            break
+                    else:
+                        floating = False
+                        disks[floater]['rect'].midtop = (towers_midx[1], 400-23)
+                        disks[floater]['tower'] = 1
+                        steps += 1
+                if (click_tower_3.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 2 and disks.index(disk) != floater:
+                            if disk['val'] > disks[floater]['val']:
+                                floating = False
+                                disks[floater]['rect'].midtop = (towers_midx[2], disk['rect'].top-23)
+                                disks[floater]['tower'] = 2
+                                steps += 1
+                            break
+                    else:
+                        floating = False
+                        disks[floater]['rect'].midtop = (towers_midx[2], 400-23)
+                        disks[floater]['tower'] = 2
+                        print("entro3", disks)
+                        steps += 1
+
+            elif (not floating):
+                if (click_tower_1.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 0:
+                            previos_disks = copy.deepcopy(disks)
+                            previous_movements.append(previos_disks)
+                            floating = True
+                            floater = disks.index(disk)
+                            disk['rect'].midtop = (towers_midx[0], 100)
+                            break
+                if (click_tower_2.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 1:
+                            previos_disks = copy.deepcopy(disks)
+                            previous_movements.append(previos_disks)
+                            floating = True
+                            floater = disks.index(disk)
+                            disk['rect'].midtop = (towers_midx[1], 100)
+                            break
+                if (click_tower_3.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 2:
+                            previos_disks = copy.deepcopy(disks)
+                            previous_movements.append(previos_disks)
+                            floating = True
+                            floater = disks.index(disk)
+                            disk['rect'].midtop = (towers_midx[2], 100)
+                            break
         if event.type == pygame.QUIT:
             game_done = True
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_u:
+                if len(previous_movements) > 0:
+                    latest_disk = previous_movements[-1]
+                    previous_movements.pop()
+                    disks = latest_disk
+                    steps -= 1
+            if event.key == pygame.K_s:
+                print(previous_movements)
             if event.key == pygame.K_ESCAPE:
                 reset()
             if event.key == pygame.K_q:
@@ -226,24 +303,28 @@ while not game_done:
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 100)
                     disks[floater]['tower'] = pointing_at
             if event.key == pygame.K_UP and not floating:
+                previos_disks = copy.deepcopy(disks)
+                previous_movements.append(previos_disks)
                 for disk in disks[::-1]:
                     if disk['tower'] == pointing_at:
                         floating = True
                         floater = disks.index(disk)
                         disk['rect'].midtop = (towers_midx[pointing_at], 100)
                         break
+
             if event.key == pygame.K_DOWN and floating:
                 for disk in disks[::-1]:
                     if disk['tower'] == pointing_at and disks.index(disk) != floater:
                         if disk['val'] > disks[floater]['val']:
                             floating = False
                             disks[floater]['rect'].midtop = (towers_midx[pointing_at], disk['rect'].top-23)
-                            steps += 1
                             first_move = True
+                            steps += 1
                         break
                 else:
                     floating = False
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
+
                     steps += 1 
                     first_move = True
             if event.key == pygame.K_h:
@@ -255,24 +336,24 @@ while not game_done:
                     blit_text(screen, f"Hint: Move from Tower {hint[0] + 1} to Tower {hint[1] + 1}", (320, 80), font_name='sans serif', size=30, color=red)
                     pygame.display.update()
                     pygame.time.wait(2000)
-        
-        ## Solver
+                    steps += 1
+
+        # Solver
         if event.type == pygame.MOUSEBUTTONDOWN and not first_move:
             if button_rect.collidepoint(mouse_pos):
-                print("test")
-
-                # auto_move(0, 2, towers_midx, disks, steps)
-                
-                
-           
-        
-
+                move_set = []
+                hanoi_solver(n_disks, 0, 2, 1, move_set)
+                print("output :", move_set)
+                for move in move_set:
+                    print(move)
+                    auto_move(move["start"], move["finish"], towers_midx, disks, steps)
+                    
                 first_move = True  # Button disappears after the first click
 
     screen.fill(white)
-    draw_towers() 
-    draw_disks()
-    draw_ptr()
+    draw_towers(screen, towers_midx, colors)
+    draw_disks(screen, disks, colors)
+    draw_ptr(screen, towers_midx, pointing_at, colors)
     if not first_move:
         draw_button()
     blit_text(screen, 'Steps: '+str(steps), (320, 20), font_name='mono', size=30, color=black)

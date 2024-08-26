@@ -1,29 +1,32 @@
-def hanoi_solver(n, source, target, auxiliary):
+def hanoi_solver(n, source, target, auxiliary, output_list):
     if n == 1:
         print(f"{source} to {target}")
+        output_list.append({"start": source, "finish": target})
         return
-    hanoi_solver(n - 1, source, auxiliary, target)
+    hanoi_solver(n - 1, source, auxiliary, target, output_list)
     print(f"{source} to {target}")
-    hanoi_solver(n - 1, auxiliary, target, source)
+    output_list.append({"start": source, "finish": target})
+    hanoi_solver(n - 1, auxiliary, target, source, output_list)
+
 
 def auto_move(start, end, towers_midx, disks, steps):
-    
-    #pick up
-    pointing_at=start
+
+    # pick up
+    pointing_at = start
     for disk in disks[::-1]:
         if disk['tower'] == pointing_at:
             floating = True
             floater = disks.index(disk)
             disk['rect'].midtop = (towers_midx[pointing_at], 100)
             break
-    
-    #move
-    pointing_at=end
+
+    # move
+    pointing_at = end
     if floating:
         disks[floater]['rect'].midtop = (towers_midx[pointing_at], 100)
         disks[floater]['tower'] = pointing_at
 
-    #drop
+    # drop
     if floating:
         for disk in disks[::-1]:
             if disk['tower'] == pointing_at and disks.index(disk) != floater:
@@ -36,5 +39,5 @@ def auto_move(start, end, towers_midx, disks, steps):
         else:
             floating = False
             disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
-            steps += 1 
+            steps += 1
             first_move = True
