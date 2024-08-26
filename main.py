@@ -110,7 +110,6 @@ def game_over():  # game over screen
     sys.exit()  # console exit
 
 
-
 def make_disks():
     global n_disks, disks
     disks = []
@@ -150,7 +149,6 @@ def reset():
     make_disks()
 
 
-
 # Function to get the current state of the towers from the disk dictionaries
 def get_tower_state(disks, n_disks):
     # The state will be a list of three lists, representing the three towers
@@ -168,8 +166,6 @@ def get_tower_state(disks, n_disks):
     return towers
 
 
-
-
 # Function to find the next optimal move using the recursive Hanoi solution logic
 def hanoi_move(n, source, target, auxiliary, moves):
     if n == 1:
@@ -179,11 +175,12 @@ def hanoi_move(n, source, target, auxiliary, moves):
     moves.append((source, target))
     hanoi_move(n - 1, auxiliary, target, source, moves)
 
+
 def get_next_move(towers):
     n = sum(len(tower) for tower in towers)
     moves = []
     hanoi_move(n, 0, 2, 1, moves)  # Solve for n disks, moving from Tower 0 to Tower 2 using Tower 1 as auxiliary
-    
+
     # Find the first move that hasn't been made yet
     for move in moves:
         source_tower, target_tower = move
@@ -192,13 +189,13 @@ def get_next_move(towers):
     return None
 
 
-
 menu_screen()
 make_disks()
 # main game loop:
 while not game_done:
     mouse_pos = pygame.mouse.get_pos()
-    blit_text(screen, button_text, button_rect.center, font_name='sans serif', size=30, color=black)
+    if not first_move:
+        draw_button()
     for event in pygame.event.get():
         if event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = event.pos
@@ -325,7 +322,7 @@ while not game_done:
                     floating = False
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
 
-                    steps += 1 
+                    steps += 1
                     first_move = True
             if event.key == pygame.K_h:
                 towers = get_tower_state(disks, n_disks)
@@ -333,7 +330,8 @@ while not game_done:
                 if hint:
                     print(f"Hint: Move disk from Tower {hint[0] + 1} to Tower {hint[1] + 1}")
                     # Optionally display this on the game screen
-                    blit_text(screen, f"Hint: Move from Tower {hint[0] + 1} to Tower {hint[1] + 1}", (320, 80), font_name='sans serif', size=30, color=red)
+                    blit_text(screen, f"Hint: Move from Tower {hint[0] + 1} to Tower {hint[1] + 1}",
+                              (320, 80), font_name='sans serif', size=30, color=red)
                     pygame.display.update()
                     pygame.time.wait(2000)
                     steps += 1
@@ -344,11 +342,28 @@ while not game_done:
                 move_set = []
                 hanoi_solver(n_disks, 0, 2, 1, move_set)
                 print("output :", move_set)
-                for move in move_set:
-                    print(move)
+                points = '...'
+                for i, move in enumerate(move_set):
                     auto_move(move["start"], move["finish"], towers_midx, disks, steps)
-                    
+                    screen.fill(white)
+                    number_of_dots = i % 3 + 1
+                    blit_text(screen, f'Auto solving{points[:number_of_dots]}',
+                              (320, 20), font_name='mono', size=30, color=black)
+                    draw_towers(screen, towers_midx, colors)
+                    draw_disks(screen, disks, colors)
+                    draw_ptr(screen, towers_midx, pointing_at, colors)
+                    pygame.display.update()
+                    pygame.time.wait(400)
+
                 first_move = True  # Button disappears after the first click
+                screen.fill(white)
+                blit_text(screen, 'Solved!', (320, 20), font_name='bold_mono', size=60, color=black)
+                draw_towers(screen, towers_midx, colors)
+                draw_disks(screen, disks, colors)
+                draw_ptr(screen, towers_midx, pointing_at, colors)
+                pygame.display.update()
+                pygame.time.wait(2000)
+                check_won()
 
     screen.fill(white)
     draw_towers(screen, towers_midx, colors)
