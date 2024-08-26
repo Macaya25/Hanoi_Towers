@@ -18,6 +18,13 @@ towers_midx = [120, 320, 520]
 pointing_at = 0
 floating = False
 floater = 0
+first_move = False
+
+# button vars:
+button_color = (200, 200, 200)
+button_hover_color = (170, 170, 170)
+button_rect = pygame.Rect(270, 410, 100, 40)
+button_text = "Autosolve"
 
 # colors:
 white = (255, 255, 255)
@@ -187,6 +194,20 @@ while not game_done:
                     floating = False
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
                     steps += 1
+                    first_move = True
+
+        # Solver
+        if event.type == pygame.MOUSEBUTTONDOWN and not first_move:
+            if button_rect.collidepoint(mouse_pos):
+                move_set = []
+                hanoi_solver(n_disks, 0, 2, 1, move_set)
+                print("output :", move_set)
+                for move in move_set:
+                    print(move)
+                    auto_move(move["start"], move["finish"], towers_midx, disks, steps)
+
+                first_move = True  # Button disappears after the first click
+
     screen.fill(white)
     draw_towers()
     draw_disks()
