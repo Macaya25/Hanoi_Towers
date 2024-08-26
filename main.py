@@ -226,6 +226,8 @@ while not game_done:
                 if (click_tower_1.collidepoint(mouse_pos)):
                     for disk in disks[::-1]:
                         if disk['tower'] == 0:
+                            previos_disks = copy.deepcopy(disks)
+                            previous_movements.append(previos_disks)
                             floating = True
                             floater = disks.index(disk)
                             disk['rect'].midtop = (towers_midx[0], 100)
@@ -233,6 +235,8 @@ while not game_done:
                 if (click_tower_2.collidepoint(mouse_pos)):
                     for disk in disks[::-1]:
                         if disk['tower'] == 1:
+                            previos_disks = copy.deepcopy(disks)
+                            previous_movements.append(previos_disks)
                             floating = True
                             floater = disks.index(disk)
                             disk['rect'].midtop = (towers_midx[1], 100)
@@ -240,6 +244,8 @@ while not game_done:
                 if (click_tower_3.collidepoint(mouse_pos)):
                     for disk in disks[::-1]:
                         if disk['tower'] == 2:
+                            previos_disks = copy.deepcopy(disks)
+                            previous_movements.append(previos_disks)
                             floating = True
                             floater = disks.index(disk)
                             disk['rect'].midtop = (towers_midx[2], 100)
