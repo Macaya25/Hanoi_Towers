@@ -1,6 +1,7 @@
 import pygame
 import sys
 import time
+import copy
 from solver import *
 
 pygame.init()
@@ -19,6 +20,7 @@ towers_midx = [120, 320, 520]
 pointing_at = 0
 floating = False
 floater = 0
+previous_movements = []
 first_move = False
 
 # button vars:
@@ -170,6 +172,13 @@ while not game_done:
         if event.type == pygame.QUIT:
             game_done = True
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_u:
+                if len(previous_movements) > 0:
+                    latest_disk = previous_movements[-1]
+                    previous_movements.pop()
+                    disks = latest_disk
+            if event.key == pygame.K_s:
+                print(previous_movements)
             if event.key == pygame.K_ESCAPE:
                 reset()
             if event.key == pygame.K_q:
@@ -185,13 +194,17 @@ while not game_done:
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 100)
                     disks[floater]['tower'] = pointing_at
             if event.key == pygame.K_UP and not floating:
+                previos_disks = copy.deepcopy(disks)
+                previous_movements.append(previos_disks)
                 for disk in disks[::-1]:
                     if disk['tower'] == pointing_at:
                         floating = True
                         floater = disks.index(disk)
                         disk['rect'].midtop = (towers_midx[pointing_at], 100)
                         break
+                
             if event.key == pygame.K_DOWN and floating:
+                print("soltaste un bloque")                
                 for disk in disks[::-1]:
                     if disk['tower'] == pointing_at and disks.index(disk) != floater:
                         if disk['val'] > disks[floater]['val']:
