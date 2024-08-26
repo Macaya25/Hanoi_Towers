@@ -29,6 +29,10 @@ button_hover_color = (170, 170, 170)
 button_rect = pygame.Rect(270, 410, 100, 40)
 button_text = "Autosolve"
 
+click_tower_1 = pygame.Rect(40, 200, 160, 220)
+click_tower_2 = pygame.Rect(240, 200, 160, 220)
+click_tower_3 = pygame.Rect(440, 200, 160, 220)
+
 # colors:
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -157,7 +161,7 @@ def reset():
     pointing_at = 0
     floating = False
     floater = 0
-    first_move = false
+    first_move = False
     menu_screen()
     make_disks()
 
@@ -169,6 +173,77 @@ while not game_done:
     mouse_pos = pygame.mouse.get_pos()
     blit_text(screen, button_text, button_rect.center, font_name='sans serif', size=30, color=black)
     for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = event.pos
+            if (floating):
+                if (click_tower_1.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 0 and disks.index(disk) != floater:
+                            if disk['val'] > disks[floater]['val']:
+                                floating = False
+                                disks[floater]['rect'].midtop = (towers_midx[0], disk['rect'].top-23)
+                                disks[floater]['tower'] = 0
+                                print("origin", disks)
+                                steps += 1
+                            break
+                    else:
+                        floating = False
+                        disks[floater]['rect'].midtop = (towers_midx[0], 400-23)
+                        disks[floater]['tower'] = 0
+                        steps += 1
+                if (click_tower_2.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 1 and disks.index(disk) != floater:
+                            if disk['val'] > disks[floater]['val']:
+                                floating = False
+                                disks[floater]['rect'].midtop = (towers_midx[1], disk['rect'].top-23)
+                                disks[floater]['tower'] = 1
+                                print("origin", disks)
+                                steps += 1
+                            break
+                    else:
+                        floating = False
+                        disks[floater]['rect'].midtop = (towers_midx[1], 400-23)
+                        disks[floater]['tower'] = 1
+                        steps += 1
+                if (click_tower_3.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 2 and disks.index(disk) != floater:
+                            if disk['val'] > disks[floater]['val']:
+                                floating = False
+                                disks[floater]['rect'].midtop = (towers_midx[2], disk['rect'].top-23)
+                                disks[floater]['tower'] = 2
+                                steps += 1
+                            break
+                    else:
+                        floating = False
+                        disks[floater]['rect'].midtop = (towers_midx[2], 400-23)
+                        disks[floater]['tower'] = 2
+                        print("entro3", disks)
+                        steps += 1
+
+            elif (not floating):
+                if (click_tower_1.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 0:
+                            floating = True
+                            floater = disks.index(disk)
+                            disk['rect'].midtop = (towers_midx[0], 100)
+                            break
+                if (click_tower_2.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 1:
+                            floating = True
+                            floater = disks.index(disk)
+                            disk['rect'].midtop = (towers_midx[1], 100)
+                            break
+                if (click_tower_3.collidepoint(mouse_pos)):
+                    for disk in disks[::-1]:
+                        if disk['tower'] == 2:
+                            floating = True
+                            floater = disks.index(disk)
+                            disk['rect'].midtop = (towers_midx[2], 100)
+                            break
         if event.type == pygame.QUIT:
             game_done = True
         if event.type == pygame.KEYDOWN:
