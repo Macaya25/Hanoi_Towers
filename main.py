@@ -177,6 +177,7 @@ while not game_done:
                     latest_disk = previous_movements[-1]
                     previous_movements.pop()
                     disks = latest_disk
+                    steps -= 1
             if event.key == pygame.K_s:
                 print(previous_movements)
             if event.key == pygame.K_ESCAPE:
@@ -202,9 +203,8 @@ while not game_done:
                         floater = disks.index(disk)
                         disk['rect'].midtop = (towers_midx[pointing_at], 100)
                         break
-                
+
             if event.key == pygame.K_DOWN and floating:
-                print("soltaste un bloque")                
                 for disk in disks[::-1]:
                     if disk['tower'] == pointing_at and disks.index(disk) != floater:
                         if disk['val'] > disks[floater]['val']:
