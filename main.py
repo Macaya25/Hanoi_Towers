@@ -1,6 +1,7 @@
 import pygame
 import sys
 import time
+from solver import *
 
 pygame.init()
 pygame.display.set_caption("Towers of Hanoi")
@@ -18,6 +19,13 @@ towers_midx = [120, 320, 520]
 pointing_at = 0
 floating = False
 floater = 0
+first_move = False
+
+# button vars:
+button_color = (200, 200, 200)
+button_hover_color = (170, 170, 170)
+button_rect = pygame.Rect(270, 410, 100, 40)
+button_text = "Autosolve"
 
 # colors:
 white = (255, 255, 255)
@@ -36,6 +44,11 @@ def blit_text(screen, text, midtop, aa=True, font=None, font_name=None, size=Non
     font_rect = font_surface.get_rect()
     font_rect.midtop = midtop
     screen.blit(font_surface, font_rect)
+
+
+def draw_button():
+    pygame.draw.rect(screen, button_color, button_rect)
+    blit_text(screen, button_text, button_rect.center, font_name='sans serif', size=30, color=black)
 
 
 def menu_screen():  # to be called before starting actual game loop
@@ -137,11 +150,12 @@ def check_won():
 
 
 def reset():
-    global steps, pointing_at, floating, floater
+    global steps, pointing_at, floating, floater, first_move
     steps = 0
     pointing_at = 0
     floating = False
     floater = 0
+    first_move = false
     menu_screen()
     make_disks()
 
@@ -150,6 +164,8 @@ menu_screen()
 make_disks()
 # main game loop:
 while not game_done:
+    mouse_pos = pygame.mouse.get_pos()
+    blit_text(screen, button_text, button_rect.center, font_name='sans serif', size=30, color=black)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             game_done = True
@@ -181,18 +197,34 @@ while not game_done:
                         if disk['val'] > disks[floater]['val']:
                             floating = False
                             disks[floater]['rect'].midtop = (towers_midx[pointing_at], disk['rect'].top-23)
+                            first_move = True
                             steps += 1
                         break
                 else:
                     floating = False
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
                     steps += 1
+
+        # Solver
+        if event.type == pygame.MOUSEBUTTONDOWN and not first_move:
+            if button_rect.collidepoint(mouse_pos):
+                move_set = []
+                hanoi_solver(n_disks, 0, 2, 1, move_set)
+                print("output :", move_set)
+                for move in move_set:
+                    print(move)
+                    auto_move(move["start"], move["finish"], towers_midx, disks, steps)
+
+                first_move = True  # Button disappears after the first click
+
     screen.fill(white)
     draw_towers()
     draw_disks()
     draw_ptr()
+    if not first_move:
+        draw_button()
     blit_text(screen, 'Steps: '+str(steps), (320, 20), font_name='mono', size=30, color=black)
     pygame.display.flip()
-    if not floating:
+    if not floating and first_move:
         check_won()
     clock.tick(framerate)
