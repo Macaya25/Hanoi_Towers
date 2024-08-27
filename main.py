@@ -47,6 +47,7 @@ green = (77, 206, 145)
 current_theme = 1
 max_themes = 2
 colors = Palette(current_theme)
+play_music(f"music/theme{current_theme}.mp3")
 
 
 def draw_button():
@@ -81,9 +82,7 @@ def menu_screen():  # to be called before starting actual game loop
                         current_theme = max_themes
                     colors = Palette(current_theme)
                     draw_menu(screen, n_disks, colors)
-                    if current_theme == 2:
-                        print('playing 2')
-                        play_music("music/theme2.mp3")
+                    play_music(f"music/theme{current_theme}.mp3")
 
                 elif event.key == pygame.K_RIGHT:
                     current_theme += 1
@@ -91,9 +90,7 @@ def menu_screen():  # to be called before starting actual game loop
                         current_theme = 1
                     colors = Palette(current_theme)
                     draw_menu(screen, n_disks, colors)
-                    if current_theme == 2:
-                        print('playing 2')
-                        play_music("music/theme2.mp3")
+                    play_music(f"music/theme{current_theme}.mp3")
 
             elif event.type == pygame.QUIT:
                 menu_done = True
@@ -147,6 +144,7 @@ def reset():
     floater = 0
     first_move = False
     menu_screen()
+    play_music(f"music/theme{current_theme}.mp3")
     make_disks()
 
 
