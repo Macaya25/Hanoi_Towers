@@ -3,12 +3,14 @@ import sys
 import time
 import copy
 from UI import Palette, blit_text, draw_menu, draw_towers, draw_disks, draw_ptr, draw_game_over
+from music import play_music, play_sound
 from solver import *
 
 pygame.init()
 pygame.display.set_caption("Towers of Hanoi")
 screen = pygame.display.set_mode((640, 480))
 clock = pygame.time.Clock()
+
 
 game_done = False
 framerate = 60
@@ -35,7 +37,6 @@ click_tower_2 = pygame.Rect(240, 200, 160, 220)
 click_tower_3 = pygame.Rect(440, 200, 160, 220)
 
 # colors:
-white = (255, 255, 255)
 black = (0, 0, 0)
 red = (255, 0, 0)
 gold = (239, 229, 51)
@@ -80,12 +81,19 @@ def menu_screen():  # to be called before starting actual game loop
                         current_theme = max_themes
                     colors = Palette(current_theme)
                     draw_menu(screen, n_disks, colors)
+                    if current_theme == 2:
+                        print('playing 2')
+                        play_music("music/theme2.mp3")
+
                 elif event.key == pygame.K_RIGHT:
                     current_theme += 1
                     if current_theme > max_themes:
                         current_theme = 1
                     colors = Palette(current_theme)
                     draw_menu(screen, n_disks, colors)
+                    if current_theme == 2:
+                        print('playing 2')
+                        play_music("music/theme2.mp3")
 
             elif event.type == pygame.QUIT:
                 menu_done = True
@@ -94,20 +102,13 @@ def menu_screen():  # to be called before starting actual game loop
         clock.tick(60)
 
 
-def game_over():  # game over screen
-    global screen, steps
-    screen.fill(white)
-    min_steps = 2**n_disks-1
-    blit_text(screen, 'You Won!', (320, 200), font_name='sans serif', size=72, color=gold)
-    blit_text(screen, 'You Won!', (322, 202), font_name='sans serif', size=72, color=gold)
-    blit_text(screen, 'Your Steps: '+str(steps), (320, 360), font_name='mono', size=30, color=black)
-    blit_text(screen, 'Minimum Steps: '+str(min_steps), (320, 390), font_name='mono', size=30, color=red)
-    if min_steps == steps:
-        blit_text(screen, 'You finished in minumum steps!', (320, 300), font_name='mono', size=26, color=green)
-    pygame.display.flip()
-    time.sleep(2)   # wait for 2 secs
-    pygame.quit()  # pygame exit
-    sys.exit()  # console exit
+def game_over(screen, steps, colors):  # game over screen
+    draw_game_over(screen, steps, n_disks, colors)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                sys.exit()  # console exit
+        clock.tick(60)
 
 
 def make_disks():
@@ -135,7 +136,7 @@ def check_won():
             over = False
     if over:
         time.sleep(0.2)
-        game_over()
+        game_over(screen, steps, colors)
 
 
 def reset():
@@ -222,7 +223,6 @@ while not game_done:
                                 floating = False
                                 disks[floater]['rect'].midtop = (towers_midx[1], disk['rect'].top-23)
                                 disks[floater]['tower'] = 1
-                                print("origin", disks)
                                 steps += 1
                             break
                     else:
@@ -243,7 +243,6 @@ while not game_done:
                         floating = False
                         disks[floater]['rect'].midtop = (towers_midx[2], 400-23)
                         disks[floater]['tower'] = 2
-                        print("entro3", disks)
                         steps += 1
 
             elif (not floating):
@@ -313,6 +312,8 @@ while not game_done:
                 for disk in disks[::-1]:
                     if disk['tower'] == pointing_at and disks.index(disk) != floater:
                         if disk['val'] > disks[floater]['val']:
+                            print('aa')
+                            play_sound('sounds/gun.wav')
                             floating = False
                             disks[floater]['rect'].midtop = (towers_midx[pointing_at], disk['rect'].top-23)
                             first_move = True
@@ -321,7 +322,8 @@ while not game_done:
                 else:
                     floating = False
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
-
+                    print('aa')
+                    play_sound('sounds/gun.wav')
                     steps += 1
                     first_move = True
             if event.key == pygame.K_h:
@@ -345,7 +347,7 @@ while not game_done:
                 points = '...'
                 for i, move in enumerate(move_set):
                     auto_move(move["start"], move["finish"], towers_midx, disks, steps)
-                    screen.fill(white)
+                    screen.fill(colors.background_color)
                     number_of_dots = i % 3 + 1
                     blit_text(screen, f'Auto solving{points[:number_of_dots]}',
                               (320, 20), font_name='mono', size=30, color=black)
@@ -356,8 +358,8 @@ while not game_done:
                     pygame.time.wait(400)
 
                 first_move = True  # Button disappears after the first click
-                screen.fill(white)
-                blit_text(screen, 'Solved!', (320, 20), font_name='bold_mono', size=60, color=black)
+                screen.fill(colors.background_color)
+                blit_text(screen, 'Solved!', (320, 20), font_name='bold_mono', size=60, color=colors.text_black)
                 draw_towers(screen, towers_midx, colors)
                 draw_disks(screen, disks, colors)
                 draw_ptr(screen, towers_midx, pointing_at, colors)
@@ -365,13 +367,13 @@ while not game_done:
                 pygame.time.wait(2000)
                 check_won()
 
-    screen.fill(white)
+    screen.fill(colors.background_color)
     draw_towers(screen, towers_midx, colors)
     draw_disks(screen, disks, colors)
     draw_ptr(screen, towers_midx, pointing_at, colors)
     if not first_move:
         draw_button()
-    blit_text(screen, 'Steps: '+str(steps), (320, 20), font_name='mono', size=30, color=black)
+    blit_text(screen, 'Steps: '+str(steps), (320, 20), font_name='mono', size=30, color=colors.text_black)
     pygame.display.flip()
     if not floating and first_move:
         check_won()
