@@ -5,6 +5,7 @@ import copy
 from UI import Palette, blit_text, draw_menu, draw_towers, draw_disks, draw_ptr, draw_game_over
 from music import play_music, play_sound
 from solver import hanoi_solver, auto_move
+from instructions import instructions_page
 
 pygame.init()
 pygame.display.set_caption("Towers of Hanoi")
@@ -191,6 +192,7 @@ def get_next_move(towers):
     return None
 
 
+instructions_page(screen, colors)
 menu_screen()
 make_disks()
 # main game loop:
