@@ -5,7 +5,7 @@ def play_music(file: str):
     pygame.mixer.init()
     pygame.mixer.music.load(file)
     pygame.mixer.music.set_volume(0.25)
-    pygame.mixer.music.play()
+    pygame.mixer.music.play(-1)
 
 
 def play_sound(sound_route: str):
