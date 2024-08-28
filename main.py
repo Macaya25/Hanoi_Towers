@@ -4,7 +4,7 @@ import time
 import copy
 from UI import Palette, blit_text, draw_menu, draw_towers, draw_disks, draw_ptr, draw_game_over
 from music import play_music, play_sound
-from solver import *
+from solver import hanoi_solver, auto_move
 
 pygame.init()
 pygame.display.set_caption("Towers of Hanoi")
@@ -48,6 +48,7 @@ current_theme = 1
 max_themes = 2
 colors = Palette(current_theme)
 play_music(f"music/theme{current_theme}.mp3")
+# background_image = change_background_image(current_theme)
 
 
 def draw_button():
@@ -56,7 +57,7 @@ def draw_button():
 
 
 def menu_screen():  # to be called before starting actual game loop
-    global screen, n_disks, game_done, colors, current_theme
+    global screen, n_disks, game_done, colors, current_theme, background_image
     menu_done = False
     while not menu_done:  # every screen/scene/level has its own loop
         draw_menu(screen, n_disks, colors)
@@ -83,6 +84,7 @@ def menu_screen():  # to be called before starting actual game loop
                     colors = Palette(current_theme)
                     draw_menu(screen, n_disks, colors)
                     play_music(f"music/theme{current_theme}.mp3")
+                    # background_image = change_background_image(current_theme)
 
                 elif event.key == pygame.K_RIGHT:
                     current_theme += 1
@@ -91,6 +93,7 @@ def menu_screen():  # to be called before starting actual game loop
                     colors = Palette(current_theme)
                     draw_menu(screen, n_disks, colors)
                     play_music(f"music/theme{current_theme}.mp3")
+                    # background_image = change_background_image(current_theme)
 
             elif event.type == pygame.QUIT:
                 menu_done = True
@@ -310,7 +313,6 @@ while not game_done:
                 for disk in disks[::-1]:
                     if disk['tower'] == pointing_at and disks.index(disk) != floater:
                         if disk['val'] > disks[floater]['val']:
-                            print('aa')
                             play_sound('sounds/gun.wav')
                             floating = False
                             disks[floater]['rect'].midtop = (towers_midx[pointing_at], disk['rect'].top-23)
@@ -320,7 +322,6 @@ while not game_done:
                 else:
                     floating = False
                     disks[floater]['rect'].midtop = (towers_midx[pointing_at], 400-23)
-                    print('aa')
                     play_sound('sounds/gun.wav')
                     steps += 1
                     first_move = True
@@ -346,6 +347,7 @@ while not game_done:
                 for i, move in enumerate(move_set):
                     auto_move(move["start"], move["finish"], towers_midx, disks, steps)
                     screen.fill(colors.background_color)
+                    # draw_theme_background(screen, background_image)
                     number_of_dots = i % 3 + 1
                     blit_text(screen, f'Auto solving{points[:number_of_dots]}',
                               (320, 20), font_name='mono', size=30, color=black)
@@ -357,6 +359,7 @@ while not game_done:
 
                 first_move = True  # Button disappears after the first click
                 screen.fill(colors.background_color)
+                # draw_theme_background(screen, background_image)
                 blit_text(screen, 'Solved!', (320, 20), font_name='bold_mono', size=60, color=colors.text_black)
                 draw_towers(screen, towers_midx, colors)
                 draw_disks(screen, disks, colors)
@@ -366,6 +369,7 @@ while not game_done:
                 check_won()
 
     screen.fill(colors.background_color)
+    # draw_theme_background(screen, background_image)
     draw_towers(screen, towers_midx, colors)
     draw_disks(screen, disks, colors)
     draw_ptr(screen, towers_midx, pointing_at, colors)
