@@ -13,8 +13,8 @@ class Palette():
                 self.text_black = (54, 69, 79)
                 self.text_1 = (255, 69, 0)
 
-                self.tower_1 = (255, 255, 0)
                 self.tower_2 = (210, 180, 140)
+                self.tower_1 = (255, 255, 0)
 
                 self.disk = (100, 162, 210)
 
@@ -25,10 +25,10 @@ class Palette():
                 self.text_black = (255, 255, 255)
                 self.text_1 = (255, 20, 147)
 
-                self.tower_1 = (47, 79, 79)
-                self.tower_2 = (0, 200, 0)
+                self.tower_2 = (201, 210, 200)
+                self.tower_1 = (104, 176, 232)
 
-                self.disk = (65, 105, 225)
+                self.disk = (70, 130, 180)
 
 
 def blit_text(screen, text, midtop, aa=True, font=None, font_name=None, size=None, color=(255, 0, 0)):
@@ -73,10 +73,7 @@ def draw_border(screen, left, top, width, height, disk=False):
 
 def draw_disks(screen, disks, colors: Palette):
     for disk in disks:
-        # draw_border(disk['rect'])
         draw_border(screen, disk['rect'].topleft[0], disk['rect'].topleft[1], disk['rect'].width, disk['rect'].height, disk=True)
-        # print(disk['rect'])
-        # print(disk['rect'].topleft)
         pygame.draw.rect(screen, colors.disk, disk['rect'], border_radius=disks_radius)
 
 

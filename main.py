@@ -2,7 +2,8 @@ import pygame
 import sys
 import time
 import copy
-from UI import Palette, blit_text, draw_menu, draw_towers, draw_disks, draw_ptr, draw_game_over, draw_theme_background, change_background_image
+from UI import (Palette, blit_text, draw_menu, draw_towers, draw_disks, draw_ptr,
+                draw_game_over, draw_theme_background, change_background_image)
 from music import play_music, play_sound
 from solver import hanoi_solver, auto_move
 from instructions import instructions_page
