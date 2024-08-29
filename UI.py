@@ -1,5 +1,6 @@
 import pygame
 black = (0, 0, 0)
+disks_radius = 7
 
 
 class Palette():
@@ -12,10 +13,10 @@ class Palette():
                 self.text_black = (54, 69, 79)
                 self.text_1 = (255, 69, 0)
 
-                self.tower_1 = (101, 67, 33)
+                self.tower_1 = (255, 255, 0)
                 self.tower_2 = (210, 180, 140)
 
-                self.disk = (78, 162, 196)
+                self.disk = (100, 162, 210)
 
             case 2:
                 self.background_color = (10, 10, 10)
@@ -24,7 +25,7 @@ class Palette():
                 self.text_black = (255, 255, 255)
                 self.text_1 = (255, 20, 147)
 
-                self.tower_1 = (255, 0, 0)
+                self.tower_1 = (47, 79, 79)
                 self.tower_2 = (0, 200, 0)
 
                 self.disk = (65, 105, 225)
@@ -60,15 +61,23 @@ def draw_towers(screen, towers_midx, colors: Palette):
     blit_text(screen, 'Finish', (towers_midx[2], 403), font_name='mono', size=14, color=colors.background_color)
 
 
-def draw_border(screen, left, top, width, height):
+def draw_border(screen, left, top, width, height, disk=False):
     border_width = 3
-    pygame.draw.rect(screen, black, pygame.Rect(left-border_width, top -
-                     border_width, width+(2*border_width), height+(2*border_width)))
+    if not disk:
+        pygame.draw.rect(screen, black, pygame.Rect(left-border_width, top -
+                                                    border_width, width+(2*border_width), height+(2*border_width)))
+    else:
+        pygame.draw.rect(screen, black, pygame.Rect(left-border_width, top - border_width, width +
+                         (2*border_width), height+(2*border_width)), border_radius=disks_radius)
 
 
 def draw_disks(screen, disks, colors: Palette):
     for disk in disks:
-        pygame.draw.rect(screen, colors.disk, disk['rect'], border_radius=7)
+        # draw_border(disk['rect'])
+        draw_border(screen, disk['rect'].topleft[0], disk['rect'].topleft[1], disk['rect'].width, disk['rect'].height, disk=True)
+        # print(disk['rect'])
+        # print(disk['rect'].topleft)
+        pygame.draw.rect(screen, colors.disk, disk['rect'], border_radius=disks_radius)
 
 
 def draw_ptr(screen, towers_midx, pointing_at, colors: Palette):

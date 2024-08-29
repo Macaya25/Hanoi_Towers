@@ -2,7 +2,7 @@ import pygame
 import sys
 import time
 import copy
-from UI import Palette, blit_text, draw_menu, draw_towers, draw_disks, draw_ptr, draw_game_over
+from UI import Palette, blit_text, draw_menu, draw_towers, draw_disks, draw_ptr, draw_game_over, draw_theme_background, change_background_image
 from music import play_music, play_sound
 from solver import hanoi_solver, auto_move
 from instructions import instructions_page
@@ -49,7 +49,7 @@ current_theme = 1
 max_themes = 2
 colors = Palette(current_theme)
 play_music(f"music/theme{current_theme}.mp3")
-# background_image = change_background_image(current_theme)
+background_image = change_background_image(current_theme)
 
 
 def draw_button():
@@ -85,7 +85,7 @@ def menu_screen():  # to be called before starting actual game loop
                     colors = Palette(current_theme)
                     draw_menu(screen, n_disks, colors)
                     play_music(f"music/theme{current_theme}.mp3")
-                    # background_image = change_background_image(current_theme)
+                    background_image = change_background_image(current_theme)
 
                 elif event.key == pygame.K_RIGHT:
                     current_theme += 1
@@ -94,7 +94,7 @@ def menu_screen():  # to be called before starting actual game loop
                     colors = Palette(current_theme)
                     draw_menu(screen, n_disks, colors)
                     play_music(f"music/theme{current_theme}.mp3")
-                    # background_image = change_background_image(current_theme)
+                    background_image = change_background_image(current_theme)
 
             elif event.type == pygame.QUIT:
                 menu_done = True
@@ -348,8 +348,8 @@ while not game_done:
                 points = '...'
                 for i, move in enumerate(move_set):
                     auto_move(move["start"], move["finish"], towers_midx, disks, steps)
-                    screen.fill(colors.background_color)
-                    # draw_theme_background(screen, background_image)
+                    # screen.fill(colors.background_color)
+                    draw_theme_background(screen, background_image)
                     number_of_dots = i % 3 + 1
                     blit_text(screen, f'Auto solving{points[:number_of_dots]}',
                               (320, 20), font_name='mono', size=30, color=black)
@@ -360,8 +360,8 @@ while not game_done:
                     pygame.time.wait(400)
 
                 first_move = True  # Button disappears after the first click
-                screen.fill(colors.background_color)
-                # draw_theme_background(screen, background_image)
+                # screen.fill(colors.background_color)
+                draw_theme_background(screen, background_image)
                 blit_text(screen, 'Solved!', (320, 20), font_name='bold_mono', size=60, color=colors.text_black)
                 draw_towers(screen, towers_midx, colors)
                 draw_disks(screen, disks, colors)
@@ -370,8 +370,8 @@ while not game_done:
                 pygame.time.wait(2000)
                 check_won()
 
-    screen.fill(colors.background_color)
-    # draw_theme_background(screen, background_image)
+    # screen.fill(colors.background_color)
+    draw_theme_background(screen, background_image)
     draw_towers(screen, towers_midx, colors)
     draw_disks(screen, disks, colors)
     draw_ptr(screen, towers_midx, pointing_at, colors)
